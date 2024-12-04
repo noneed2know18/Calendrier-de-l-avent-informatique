@@ -157,13 +157,13 @@
                     dayElement.addEventListener('click', () => {
                         if (!openedDays.has(i)) {
                             // Affiche une surprise si le jour est débloqué
-                            surpriseBox.innerHTML = <strong>Jour ${i} :</strong> ${surprises[i - 1]};
+                            surpriseBox.innerHTML = `<strong>Jour ${i} :</strong> ${surprises[i - 1]}`;
                             openedDays.add(i);
                             dayElement.classList.add('opened');
                             dayElement.classList.remove('locked');
                         } else {
                             // Réaffiche la surprise si déjà ouverte
-                            surpriseBox.innerHTML = <strong>Jour ${i} :</strong> ${surprises[i - 1]};
+                            surpriseBox.innerHTML = `<strong>Jour ${i} :</strong> ${surprises[i - 1]}`;
                         }
                     });
                 }
@@ -176,7 +176,7 @@
         function showAllHints() {
             allHintsBox.style.display = "block";
             allHintsBox.innerHTML = surprises
-                .map((hint, index) => <p><strong>Jour ${index + 1} :</strong> ${hint}</p>)
+                .map((hint, index) => `<p><strong>Jour ${index + 1} :</strong> ${hint}</p>`)
                 .join("");
             hintsButton.style.display = "none";
         }
