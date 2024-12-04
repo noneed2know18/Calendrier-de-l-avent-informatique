@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier de l'Avent Hacker</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #39ff14;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #39ff14;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(6, 50px);
+            gap: 10px;
+        }
+        .day {
+            width: 50px;
+            height: 50px;
+            background-color: #111;
+            color: #39ff14;
+            border: 2px solid #39ff14;
+            text-align: center;
+            line-height: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .day:hover {
+            background-color: #39ff14;
+            color: #0d1117;
+        }
+        .day.locked {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .day.opened {
+            background-color: #39ff14;
+            color: #0d1117;
+            cursor: pointer;
+        }
+        #surprise, #all-hints {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #39ff14;
+            background-color: #111;
+            text-align: center;
+            max-width: 400px;
+        }
+        #surprise a, #all-hints a {
+            color: #39ff14;
+            text-decoration: underline;
+        }
+        #surprise a:hover, #all-hints a:hover {
+            color: #0d1117;
+            background-color: #39ff14;
+        }
+        #view-hints-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #0d1117;
+            background-color: #39ff14;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #view-hints-btn:hover {
+            background-color: #0bff10;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 16px;
+            text-align: center;
+            color: #39ff14;
+            padding: 10px;
+            border-top: 2px solid #39ff14;
+            width: 100%;
+            background-color: #111;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calendrier de l'Avent Hacker</h1>
+    <div class="calendar"></div>
+    <div id="surprise">Cliquez sur un jour débloqué pour découvrir une surprise !</div>
+    <button id="view-hints-btn" style="display: none;" onclick="showAllHints()">Voir toutes les astuces</button>
+    <div id="all-hints" style="display: none;"></div>
+    <footer>© ռօռɛɛɖ2ӄռօա</footer>
+
+    <script>
+        const calendar = document.querySelector('.calendar');
+        const surpriseBox = document.getElementById('surprise');
+        const allHintsBox = document.getElementById('all-hints');
+        const hintsButton = document.getElementById('view-hints-btn');
+        const today = new Date();
+        const currentDay = today.getDate();
+        const currentMonth = today.getMonth(); // Décembre = 11
+        const openedDays = new Set();
+
+        // Surprises pour chaque jour
+        const surprises = [
+            "Astuce : Utilisez un VPN pour sécuriser vos connexions.",
+            "Outil : Essayez Wireshark pour analyser votre réseau.",
+            "Astuce : Activez 2FA sur tous vos comptes.",
+            "Lien : <a href='https://tryhackme.com/' target='_blank'>TryHackMe</a>, apprenez à hacker.",
+            "Outil : Utilisez Nmap pour scanner vos ports.",
+            "Astuce : Changez régulièrement vos mots de passe.",
+            "Lien : <a href='https://kali.org/' target='_blank'>Kali Linux</a>, une distribution pour pentesting.",
+            "Outil : Testez Metasploit pour découvrir des vulnérabilités.",
+            "Astuce : Sauvegardez vos données critiques.",
+            "Lien : Découvrez les <a href='https://owasp.org/www-project-top-ten/' target='_blank'>OWASP Top 10</a>.",
+            "Astuce : Sécurisez votre réseau Wi-Fi avec WPA3.",
+            "Lien : Essayez des CTF sur <a href='https://ctftime.org/' target='_blank'>CTFTime</a>.",
+            "Astuce : Surveillez vos journaux système.",
+            "Lien : Protégez vos fichiers avec <a href='https://gnupg.org/' target='_blank'>GPG</a>.",
+            "Astuce : Évitez de cliquer sur des liens suspects.",
+            "Outil : Découvrez Burp Suite pour analyser des sites web.",
+            "Astuce : Apprenez Bash pour automatiser vos tâches.",
+            "Lien : Consultez des infos sur <a href='https://krebsonsecurity.com/' target='_blank'>Krebs on Security</a>.",
+            "Astuce : Déconnectez vos disques externes après usage.",
+            "Lien : Essayez <a href='https://bitwarden.com/' target='_blank'>Bitwarden</a> pour gérer vos mots de passe.",
+            "Outil : Utilisez Aircrack-ng pour tester la sécurité Wi-Fi.",
+            "Astuce : Mettez à jour vos logiciels régulièrement.",
+            "Lien : Essayez TOR pour protéger votre vie privée.",
+            "Dernier jour ! Prenez soin de vous en ligne et partagez vos connaissances avec les autres."
+        ];
+
+        // Vérifie si le calendrier est terminé
+        if (currentMonth === 11 && currentDay > 24) {
+            calendar.style.display = "none";
+            surpriseBox.innerHTML = "🎄 Le calendrier de l'Avent est terminé ! Restez protégés en ligne et continuez d'apprendre la cybersécurité.";
+            hintsButton.style.display = "block";
+        } else {
+            // Générer les 24 jours
+            for (let i = 1; i <= 24; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = i;
+                dayElement.classList.add('day');
+
+                // Verrouiller les jours futurs
+                if (currentMonth !== 11 || i > currentDay) {
+                    dayElement.classList.add('locked');
+                } else {
+                    dayElement.addEventListener('click', () => {
+                        if (!openedDays.has(i)) {
+                            // Affiche une surprise si le jour est débloqué
+                            surpriseBox.innerHTML = <strong>Jour ${i} :</strong> ${surprises[i - 1]};
+                            openedDays.add(i);
+                            dayElement.classList.add('opened');
+                            dayElement.classList.remove('locked');
+                        } else {
+                            // Réaffiche la surprise si déjà ouverte
+                            surpriseBox.innerHTML = <strong>Jour ${i} :</strong> ${surprises[i - 1]};
+                        }
+                    });
+                }
+
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Affiche toutes les astuces
+        function showAllHints() {
+            allHintsBox.style.display = "block";
+            allHintsBox.innerHTML = surprises
+                .map((hint, index) => <p><strong>Jour ${index + 1} :</strong> ${hint}</p>)
+                .join("");
+            hintsButton.style.display = "none";
+        }
+    </script>
+</body>
+</html>
